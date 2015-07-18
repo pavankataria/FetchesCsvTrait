@@ -11,40 +11,65 @@ use SplFileObject;
 /**
  * Class PKEasyCsvHandlingTrait.
  */
-trait FetchesCsv
+class FetchesCsv
 {
-    public function createFromPath($path);
+    /**
+     * @param $path
+     * @return $this
+     */
+    public static function createFromPath($path)
     {
         $this->$reader = Reader::createFromPath($path)->stripBom(true);
         $this->$reader->setFlags(SplFileObject::SKIP_EMPTY);
         return $this;
     }
 
-    public function csvContainsHeaders(&$originalHeadersReference = null)
+
+    /**
+     * @param int $headerLocationOffset
+     * @param null $originalHeadersReference
+     * @return $this
+     */
+    public function containsHeaders($headerLocationOffset = 0, &$originalHeadersReference = null)
     {
-        $this->$csvContainsHeaders = true;
+        $this->$headerLocationOffset = $headerLocationOffset;
         if(isset($originalHeadersReference)){
-            $this->$originalHeadersReference = $originalHeadersReference = $this->$reader->fetchOne($offset);
+            $this->originalHeadersReference = $originalHeadersReference = $this->$reader->fetchOne($headerLocationOffset);
         }
-        return this;
+        return $this;
     }
 
-    public function applyCustomerHeaders($customHeadersArray){
+    /**
+     * @param $customHeadersArray
+     * @return $this
+     */
+    public function applyCustomHeaders($customHeadersArray){
         $this->$customHeadersArray = $customHeadersArray;
         return $this;
     }
-    public function setOffset($offsetInteger){
-        $this->$offsetInteger = $offsetInteger;
-        $this->$reader->setOffset($offset);
-        return $this;
-    }
-    
+
+    /**
+     * @return mixed
+     */
     public function fetchAssoc(){
         $headersToUse = isset($this->$customHeadersArray) ? $this->$customHeadersArray : $this->$originalHeadersReference;
-        $data = $reader->setOffset($offset)->fetchAssoc($headersToUse);
+        $offset = 0;
+        if(isset($headerLocationOffset)){
+            $offset = $this->$headerLocationOffset+1;
+        }
+        $data = $this->$reader->setOffset($offset)->fetchAssoc($headersToUse);
         return $data = $this->$reader->fetchAssoc($headersToUse);
     }
 
+//    /**
+//     * @param $offsetInteger
+//     * @return $this
+//     */
+//    public function setOffset($offsetInteger){
+//        $this->$offsetInteger = $offsetInteger;
+//        $this->$reader->setOffset($offset);
+//        return $this;
+//    }
 
 
     /**
